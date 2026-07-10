@@ -33,26 +33,25 @@ jobs:
         run: cmake --build desktop/build
 
       - name: Package
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          if [[ -f desktop/build/loop10.exe ]]; then
-            EXE_DIR="desktop/build"
-          elif [[ -f desktop/build/Release/loop10.exe ]]; then
-            EXE_DIR="desktop/build/Release"
-          else
-            echo "loop10.exe not found"
-            find desktop/build -name "loop10.exe" || true
+          if (Test-Path "desktop/build/loop10.exe") {
+            $exeDir = "desktop/build"
+          } elseif (Test-Path "desktop/build/Release/loop10.exe") {
+            $exeDir = "desktop/build/Release"
+          } else {
+            Write-Error "loop10.exe not found"
+            Get-ChildItem -Recurse desktop/build -Filter loop10.exe
             exit 1
-          fi
-          if [[ ! -d "$EXE_DIR/ui" ]]; then
-            echo "ui/ folder missing next to loop10.exe"
+          }
+          if (-not (Test-Path "$exeDir/ui")) {
+            Write-Error "ui/ folder missing next to loop10.exe"
             exit 1
-          fi
-          mkdir -p dist
-          cp "$EXE_DIR/loop10.exe" dist/
-          cp -R "$EXE_DIR/ui" dist/ui
-          powershell Compress-Archive -Path dist/* -DestinationPath loop10-windows.zip -Force
+          }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item "$exeDir/loop10.exe" dist/
+          Copy-Item "$exeDir/ui" dist/ui -Recurse
+          Compress-Archive -Path "dist/loop10.exe", "dist/ui" -DestinationPath loop10-windows.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
