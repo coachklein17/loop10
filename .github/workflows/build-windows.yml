@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -21,20 +21,28 @@ jobs:
             git clone --depth 1 https://github.com/webview/webview.git vendor/webview
           fi
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Configure
-        run: cmake -S desktop -B desktop/build -G "Visual Studio 17 2022" -A x64
+        run: cmake -S desktop -B desktop/build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
       - name: Build Release
-        run: cmake --build desktop/build --config Release
+        run: cmake --build desktop/build
 
       - name: Package
         shell: bash
         run: |
           set -euo pipefail
-          EXE_DIR="desktop/build/Release"
-          if [[ ! -f "$EXE_DIR/loop10.exe" ]]; then
-            echo "loop10.exe not found in $EXE_DIR"
-            ls -la desktop/build || true
+          if [[ -f desktop/build/loop10.exe ]]; then
+            EXE_DIR="desktop/build"
+          elif [[ -f desktop/build/Release/loop10.exe ]]; then
+            EXE_DIR="desktop/build/Release"
+          else
+            echo "loop10.exe not found"
+            find desktop/build -name "loop10.exe" || true
             exit 1
           fi
           if [[ ! -d "$EXE_DIR/ui" ]]; then
