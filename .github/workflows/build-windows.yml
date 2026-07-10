@@ -1,0 +1,54 @@
+name: Build Windows
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch webview vendor
+        shell: bash
+        run: |
+          if [[ ! -f vendor/webview/CMakeLists.txt ]]; then
+            mkdir -p vendor
+            git clone --depth 1 https://github.com/webview/webview.git vendor/webview
+          fi
+
+      - name: Configure
+        run: cmake -S desktop -B desktop/build -G "Visual Studio 17 2022" -A x64
+
+      - name: Build Release
+        run: cmake --build desktop/build --config Release
+
+      - name: Package
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXE_DIR="desktop/build/Release"
+          if [[ ! -f "$EXE_DIR/loop10.exe" ]]; then
+            echo "loop10.exe not found in $EXE_DIR"
+            ls -la desktop/build || true
+            exit 1
+          fi
+          if [[ ! -d "$EXE_DIR/ui" ]]; then
+            echo "ui/ folder missing next to loop10.exe"
+            exit 1
+          fi
+          mkdir -p dist
+          cp "$EXE_DIR/loop10.exe" dist/
+          cp -R "$EXE_DIR/ui" dist/ui
+          powershell Compress-Archive -Path dist/* -DestinationPath loop10-windows.zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: loop10-windows
+          path: loop10-windows.zip
+          retention-days: 30

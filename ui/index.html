@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loop 10</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body tabindex="0">
+    <div id="viewport">
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <div id="post-fx" aria-hidden="true">
+      <div id="vignette"></div>
+      <div id="chromatic"></div>
+      <div id="scanlines"></div>
+      <canvas id="grain"></canvas>
+    </div>
+
+    <div id="load-veil" aria-hidden="true">
+      <span class="load-dots">...</span>
+    </div>
+
+    <div id="intro-veil" aria-hidden="true"></div>
+
+    <div id="title-screen" class="menu-screen is-visible">
+      <h1 class="menu-title">Loop 10</h1>
+      <p class="menu-prompt">Press L to begin</p>
+      <p class="menu-prompt menu-sub">Press S for settings</p>
+    </div>
+
+    <div id="story-screen" class="menu-screen" aria-hidden="true">
+      <p class="story-text">
+        You were sound asleep. Now you are awake — barefoot on cold carpet in the dark
+        hallway outside your bedroom. The nightlight is gone. The walls feel too close.
+        You need to reach the end of the hall, but every time you look away you feel it:
+        something standing behind you. Watching. Waiting for you to blink.
+      </p>
+      <p class="menu-prompt">Press L to continue</p>
+    </div>
+
+    <div id="pause-menu" class="menu-screen" aria-hidden="true">
+      <h2 class="menu-heading">paused</h2>
+      <div class="menu-actions">
+        <button type="button" class="menu-btn" data-action="resume">Resume</button>
+        <button type="button" class="menu-btn" data-action="settings">Settings</button>
+        <button type="button" class="menu-btn" data-action="main-menu">Main Menu</button>
+        <button type="button" class="menu-btn menu-btn-danger" data-action="quit">Quit Game</button>
+      </div>
+      <p class="menu-prompt">Esc — resume</p>
+    </div>
+
+    <div id="settings-menu" class="menu-screen" aria-hidden="true">
+      <h2 class="menu-heading">settings</h2>
+      <div class="settings-group">
+        <label class="settings-label" for="volume-slider">Master volume</label>
+        <input id="volume-slider" class="settings-slider" type="range" min="0" max="100" value="100" />
+      </div>
+      <div class="settings-group">
+        <label class="settings-label" for="sensitivity-slider">Mouse sensitivity</label>
+        <input id="sensitivity-slider" class="settings-slider" type="range" min="25" max="200" value="100" />
+      </div>
+      <button type="button" class="menu-btn" id="settings-back">Back</button>
+    </div>
+
+    <p id="loop-counter" class="loop-counter" aria-live="polite">loop 1</p>
+
+    <div id="stare-meter" class="stare-meter" aria-hidden="true">
+      <div id="stare-fill" class="stare-fill"></div>
+    </div>
+
+    <div id="win-veil" class="win-veil" aria-hidden="true">
+      <div class="win-content">
+        <p class="win-message">you faced your fear</p>
+        <p class="menu-prompt win-exit">Press X to exit to main menu</p>
+      </div>
+    </div>
+
+    <p id="hint" class="hint" aria-hidden="true">there's something at the end</p>
+
+    <script src="lib/three.min.js"></script>
+    <script src="lib/PointerLockControls.js"></script>
+    <script src="scene.js" defer></script>
+  </body>
+</html>
