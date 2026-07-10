@@ -12,10 +12,39 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <wrl/client.h>
+#include <WebView2.h>
 
 namespace fs = std::filesystem;
 
 namespace {
+
+bool navigate_to_local_ui(webview::webview &window, const fs::path &ui_index) {
+  const fs::path ui_dir = fs::absolute(ui_index.parent_path());
+
+  auto controller_result = window.browser_controller();
+  if (!controller_result.ok() || !controller_result.value()) {
+    return false;
+  }
+
+  auto *controller =
+      static_cast<ICoreWebView2Controller *>(controller_result.value());
+  Microsoft::WRL::ComPtr<ICoreWebView2> webview;
+  if (FAILED(controller->get_CoreWebView2(webview.GetAddressOf())) || !webview) {
+    return false;
+  }
+
+  const std::wstring folder = ui_dir.wstring();
+  const HRESULT map_result = webview->SetVirtualHostNameToFolderMapping(
+      L"loop10.local", folder.c_str(),
+      COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
+  if (FAILED(map_result)) {
+    return false;
+  }
+
+  window.navigate("https://loop10.local/index.html");
+  return true;
+}
 
 webview::webview *g_window = nullptr;
 HWND g_hwnd = nullptr;
@@ -261,7 +290,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
       return "{\"ok\":true}";
     });
 
-    window.navigate(file_uri_for(ui_index));
+    if (!navigate_to_local_ui(window, ui_index)) {
+      window.navigate(file_uri_for(ui_index));
+    }
     window.dispatch([]() { setup_desktop_input(); });
     window.run();
 

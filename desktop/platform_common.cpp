@@ -42,7 +42,15 @@ std::string url_encode(const std::string &native) {
 
 std::string file_uri_for(const fs::path &path) {
   const auto absolute = fs::absolute(path).lexically_normal();
-  return "file://" + url_encode(absolute.string());
+  const std::string encoded = url_encode(absolute.string());
+#if defined(_WIN32)
+  // WebView2 expects file:///C:/... on Windows.
+  if (encoded.size() >= 2 && std::isalpha(static_cast<unsigned char>(encoded[0])) &&
+      encoded[1] == ':') {
+    return "file:///" + encoded;
+  }
+#endif
+  return "file://" + encoded;
 }
 
 fs::path executable_dir() {
