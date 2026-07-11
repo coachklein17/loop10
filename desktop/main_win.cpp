@@ -34,8 +34,13 @@ bool navigate_to_local_ui(webview::webview &window, const fs::path &ui_index) {
     return false;
   }
 
+  Microsoft::WRL::ComPtr<ICoreWebView2_3> webview3;
+  if (FAILED(webview.As(&webview3)) || !webview3) {
+    return false;
+  }
+
   const std::wstring folder = ui_dir.wstring();
-  const HRESULT map_result = webview->SetVirtualHostNameToFolderMapping(
+  const HRESULT map_result = webview3->SetVirtualHostNameToFolderMapping(
       L"loop10.local", folder.c_str(),
       COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
   if (FAILED(map_result)) {
