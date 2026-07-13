@@ -262,13 +262,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     webview::webview window(false, nullptr);
     g_window = &window;
 
+    window.set_title("Loop 10");
+    window.set_size(1280, 720, WEBVIEW_HINT_NONE);
+
     auto hwnd_result = window.window();
     if (hwnd_result.ok() && hwnd_result.value()) {
       g_hwnd = static_cast<HWND>(hwnd_result.value());
+      HICON icon = static_cast<HICON>(LoadImageW(
+          GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101), IMAGE_ICON,
+          0, 0, LR_DEFAULTSIZE));
+      if (icon) {
+        SendMessageW(g_hwnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(icon));
+        SendMessageW(g_hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
+      }
     }
-
-    window.set_title("Loop 10");
-    window.set_size(1280, 720, WEBVIEW_HINT_NONE);
 
     window.bind("nativeQuit", [&window](const std::string &) -> std::string {
       release_mouse_capture();

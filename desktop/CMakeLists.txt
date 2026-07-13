@@ -58,10 +58,14 @@ string(REPLACE "\\" "/" PROJECT_ROOT "${PROJECT_ROOT}")
 
 set(LOOP10_UI_DIR "${CMAKE_SOURCE_DIR}/../ui")
 
+set(LOOP10_ICON_ICNS "${CMAKE_SOURCE_DIR}/icons/loop10.icns")
+set(LOOP10_ICON_ICO "${CMAKE_SOURCE_DIR}/icons/loop10.ico")
+
 if(WIN32)
   add_executable(loop10 WIN32
     main_win.cpp
     platform_common.cpp
+    loop10.rc
   )
 
   target_link_libraries(loop10 PRIVATE webview::core_static)
@@ -78,12 +82,19 @@ elseif(APPLE)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   find_library(COREGRAPHICS_FRAMEWORK CoreGraphics)
 
-  add_executable(loop10 MACOSX_BUNDLE main.mm)
+  set_source_files_properties(${LOOP10_ICON_ICNS} PROPERTIES
+    MACOSX_PACKAGE_LOCATION "Resources")
+
+  add_executable(loop10 MACOSX_BUNDLE
+    main.mm
+    ${LOOP10_ICON_ICNS}
+  )
 
   set_target_properties(loop10 PROPERTIES
     MACOSX_BUNDLE TRUE
     MACOSX_BUNDLE_GUI_IDENTIFIER "com.loop10.game"
     MACOSX_BUNDLE_BUNDLE_NAME "Loop 10"
+    MACOSX_BUNDLE_ICON_FILE "loop10.icns"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
     MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
   )
